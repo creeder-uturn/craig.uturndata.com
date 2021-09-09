@@ -1,0 +1,29 @@
+body {
+  background: #f5f5f5;
+  color: #34383e;
+}
+
+a {
+  color: #0889d1;
+  text-decoration-skip: ink;
+}
+
+em {
+  color: #176eab;
+}
+
+.comment {
+  color: #6dab17;
+}
+
+small {
+  font-size: 50%;
+}
+
+div.slide {
+  white-space: nowrap;
+}
+
+div.wrap.slide {
+  white-space: normal;
+}

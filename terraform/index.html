@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+  <title>Big</title>
+  <link href="big.css" rel="stylesheet" type="text/css" />
+  <link href="themes/light-custom.css" rel="stylesheet" type="text/css" />
+  <script src="big.js"></script>
+</head>
+<body class="light">
+  <div>Terraform 101</div>
+  <div>Who am I?</div>
+  <div>Craig Reeder</div>
+  <div>
+    Cloud Engineer @<br>
+    <em>Uturn Data Solutions</em></div>
+  <div>You could also call me a Terraform Engineer</div>
+  <div>I write a lot of Terraform</div>
+  <div>What is Terraform?</div>
+  <div class=wrap>It is an open source infrastructure as code software tool.</div>
+  <div>What does that <em style="font-style: oblique;">mean</em>?</div>
+  <div class=wrap>It means that your infrastructure is represented <span style="font-style: oblique;">as code</span>.</div>
+  <div>Why?</div>
+  <div class=wrap>Allows the provisioning to be automated, repeatable, and less error prone.</div>
+  <div>There's a lot of tools for this</div>
+  <div class=layout>
+    <img src="assets/iac.png">
+  </div>
+  <div>Why <em>Terraform</em>?</div>
+  <div>Terraform is cross-platform</div>
+  <div>
+    Terraform is cloud-agnostic
+    <notes>While we primarily use it for AWS, it can be used for much, much more.</notes>
+  </div>
+  <div>
+    Terraform is popular
+    <notes>This has lots of benefits as far as community support and documentations</notes>
+  </div>
+  <div>So lets learn some Terraform!</div>
+  <div>First, some important concepts</div>
+  <div>What's a Provider?</div>
+  <div class=wrap>Providers connect Terraform to to the underlying architecture</div>
+  <div>Terraform is just a tool to write configuration</div>
+  <div class=wrap>The provider performs the "magic" of converting that configuration to the result</div>
+  <div class=layout>
+    <img src="assets/dominos.jpg">
+  </div>
+  <div>You can even order pizza with Terraform</div>
+  <div class=wrap>The most common provider for our purposes is AWS</div>
+  <div class=wrap>Other common ones are PostgreSQL, Cloudflare, and Kubernetes</div>
+  <div>What is a Resource?</div>
+  <div class=wrap>A resource is one or more infrastructure objects that is implemented by the provider</div>
+  <div>Resources are the bread and butter of Terraform</div>
+  <div>
+    <pre>
+<em>resource "aws_instance" "example"</em> {
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = "t3.micro"
+
+  tags = {
+    Name = "ExampleServer"
+  }
+}
+    </pre>
+    <notes>Resource - Type of resource - identifier of resource.</notes>
+  </div>
+  <div>Resources have parameters</div>
+  <div>Parameters are for configuring a resource</div>
+  <div>
+    <pre>
+resource "aws_instance" "example" {
+<em>  ami           = data.aws_ami.ubuntu.id
+  instance_type = "t3.micro"
+
+  tags = {
+    Name = "ExampleServer"
+  }</em>
+}
+    </pre>
+  </div>
+  <div>Resources have attributes</div>
+  <div class=wrap>Attributes get information out of a resource</div>
+  <div>
+    <pre>
+resource <em>"aws_instance" "example"</em> {
+  ...
+}
+
+# You can later use this value
+<em>aws_instance.example</em>.private_ip
+    </pre>
+  </div>
+  <div class=wrap>How do I know the parameters and attributes for a specific resource?</div>
+  <div class=wrap>Terraform Registry contains all public providers and documentation for them</div>
+  <div class=wrap>
+    Google search tends to work better for the registry
+    <notes>For example, search "Terraform AWS EC2 Instance"</notes>
+  </div>
+  <div>
+    <img src="assets/google.png">
+  </div>
+  <div>Input Variables</div>
+  <div class=wrap>Input variables allow for changing configuration values</div>
+  <div>
+    <pre>
+variable <em>"username"</em> {
+  type = string
+  description = "Username to apply the changes to"
+  default = "Steve"
+}
+
+<span class="comment"># You can later use this value</span>
+var.<em>username</em>
+    </pre>
+  </div>
+  <div class=wrap>Variables can be set via environment variables, tfvars files, or passed during apply</div>
+  <div class=wrap>If a variable doesn't have a default and isn't set it will prompt you on apply</div>
+  <div class=wrap>Unlike other programming languages, variables cannot change during run-time</div>
+  <div>Local Values</div>
+  <div class=wrap>Local values allow for a static value to be set during runtime</div>
+  <div class=wrap>These are kind of like constants in other programming languages</div>
+  <div>
+    <pre>
+locals {
+  <em>department</em> = "Operations"
+  <span class="comment"># ...
+  # you can also define more here</span>
+}
+
+<span class="comment"># You can later use this value</span>
+<em>local.department</em>
+    </pre>
+  </div>
+  <div>Output Values</div>
+  <div class=wrap>Can you guess what output values are?</div>
+  <div class=wrap>
+    Output values do exactly what they sound like
+    <notes>They allow you to get information out of the Terraform easily</notes>
+  </div>
+  <div>
+    <pre>
+output "public_ip" {
+  value = <em>aws_instance.example.public_ip</em>
+}
+    </pre>
+  </div>
+
+  <div>Data Source</div>
+  <div class=wrap>Data sources allow you to get information from a remote location into your terraform</div>
+  <div class=wrap>Providers implement data sources, much like resources</div>
+  <div class=wrap>A common data source is to get the most recent version of an AMI</div>
+  <div>
+    <pre>
+<em>data "aws_ami" "windows_server_2019"</em> {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["Windows_Server-2019-English-Full-Base-*"]
+  }
+}
+
+<span class="comment"># You can later use this value
+# Note the "image_id" attribute here</span>
+<em>data.aws_ami.windows_server_2019.image_id</em>
+    </pre>
+  </div>
+  <div class=wrap>You can also use data sources to access another terraform project's resource information</div>
+
+  <div>State Files</div>
+  <div class=wrap>Terraform keeps track of what it creates</div>
+  <div>It stores this in a statefile</div>
+  <div class=wrap>This statefile contains all of the information about any resources created</div>
+  <div class=wrap>You should <em>never</em> modify the statefile directly</div>
+  <div class=wrap>Corrupting your state means that terraform <em>doesn't know what exists</em></div>
+  <div class=wrap>It may create <em>new</em> copies of infrastructure, or <em>destroy</em> the existing ones</div>
+  <div class=wrap>
+    With no additional configuration, statefiles are stored locally<br>
+    <small>In a file called "terraform.tfstate"</small>
+  </div>
+  <div class=wrap>It's possible to move that state to a remote location</div>
+  <div class=wrap>In AWS, we use <em>S3 buckets</em> (Object storage)</div>
+  <div class=wrap>This enables multiple people to share a statefile to manage the same infrastructure</div>
+
+
+  <div>Modules</div>
+  <div class=wrap>Modules allow you to reuse terraform code multiple times, in multiple places</div>
+  <div>Kind of like a software library, or a function</div>
+  <div class=wrap>
+    Modules use <em>input variables</em> as their parameters and <em>output values</em> as attributes
+  </div>
+  <div class=wrap>
+    Modules can define multiple resources, or use multiple data sources
+    <notes>They can do anything any other terraform code can do</notes>
+  </div>
+  <div class=wrap>
+    Modules can be sourced remotely or locally
+    <notes>This tells terraform where to find the code for a module</notes>
+  </div>
+  <div class=wrap>Modules are written in the same terraform code</div>
+  <div>
+    <pre>
+<span class=comment># This is just an identifier for local access,
+# not the name of the module</span>
+module <em>"servers"</em> {
+  <span class=comment># This is a local "relative" source reference</span>
+  source = <em>"../modules/example-cluster"</em>
+
+  servers = 5 <span class=comment># Module's input variables are parameters</span>
+}
+
+<span class="comment"># Modules's outputs become attributes
+#(you can use this elsewhere)</span>
+module.<em>servers</em>.ip_list
+    </pre>
+  </div>
+  <div class=wrap>To know a modules <em>parameters</em> and <em>attributes</em>, you need to refer to it's documentation or code</div>
+
+
+  <div>We've written some terraform code now</div>
+  <div>How do we actually apply it?</div>
+  <div>
+    First, you need to initialize
+    <pre>$ <em>terraform init</em></pre>
+  </div>
+  <div class=wrap>You don't need to re-initialize every time you run, Terraform will generally tell you</div>
+  <div>
+    To see the changes Terraform will make:
+    <pre>$ <em>terraform plan</em></pre>
+  </div>
+  <div class=wrap>Planning will show you what terraform will change on apply, without changing anything</div>
+  <div>
+    Ready to make your infrastructure changes?
+    <pre>$ <em>terraform apply</em></pre>
+    <notes>This will prompt you for confirmation</notes>
+  </div>
+
+  <div>Some final notes</div>
+  <div class=wrap>Filenames don't matter in Terraform (only extensions)</div>
+  <div>All files with <em>.tf</em> will be combined for the apply</div>
+  <div>With Remote State comes Locking</div>
+  <div class=wrap>Two people can't apply the the same project at the same time</div>
+  <div class=wrap>In Terraform, your project is a module (even if it's used directly)</div>
+  <div class=wrap>In the documentation, you'll see slightly different language</div>
+  <div>
+    We Say → Terraform Docs<br>
+    "Projects" → Root Modules<br>
+    "Modules" → Child Modules
+  </div>
+  <div>?</div>
+</body>
+</html>
