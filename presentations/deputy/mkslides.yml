@@ -1,0 +1,14 @@
+slides:
+  theme: moon
+  highlight_theme: monokai
+  separator_notes: '^Note:'
+
+revealjs:
+  slideNumber: false
+  transition: slide
+  hash: true
+  controls: true
+
+plugins:
+  - extra_css:
+      - custom.css

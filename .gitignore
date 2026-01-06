@@ -1,0 +1,5 @@
+# Build output
+public/
+
+# Build process
+.claude/

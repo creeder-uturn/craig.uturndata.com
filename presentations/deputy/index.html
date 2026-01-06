@@ -1,0 +1,47 @@
+  <div>The Confused Deputy Problem (AWS IAM)</div>
+  <div>Who am I?</div>
+  <div>Craig Reeder</div>
+  <div>
+    Lead Cloud Engineer @<br>
+    <em>Uturn Data Solutions</em>
+  </div>
+  <div>What is it?</div>
+  <div>TODO: Wikipedia definition here</div>
+  <div>In less formal terms:</div>
+  <div>When a trusted neutral party is convinced to do bad things on behalf of the attacker</div>
+  <div>Simple Non-Technical Example:</div>
+  <div>You give your friend a key to your house just in case</div>
+  <div>While on vacation, an attacker texts your friend</div>
+  <div>Hi friend! I need something valuable I left at home accidentally. Can you mail it to me at my hotel, here's the address</div>
+  <div>In this example, your friend is the confused deputy</div>
+  <div>Real world example using AWS</div>
+  <div>
+    You pay for a cloud management platform
+    <notes>Real world software: CloudCheckr</notes>
+  </div>
+  <div>
+    As part of the onboarding process, you provide the ID for an identity the management platform can use
+    <notes>The ID for this identity is not considered a secret - it is like a username</notes>
+  </div>
+  <div>AWS handles authentication, you just provide the account ID that you trust (the deputy)</div>
+  <div>The situation now: the Cloud Management Platform has full admin to your AWS environment, you trust them</div>
+  <div>An attacker hires the same cloud management platform</div>
+  <div>As part of their onboarding process, they provide the ID for your identity</div>
+  <div>As you've set up the authentication for your onboarding, the deputy is able to authenticate to your environment</div>
+  <div>The attacker now has access to your environment through the confused deputy (the cloud management platform)</div>
+  <div>Solutions</div>
+  <div>There's a lot of potential solutions to the confused deputy problem</div>
+  <div>I want to talk about the way that AWS addresses this</div>
+  <div>External ID</div>
+  <div>External ID is an identifier provided by the deputy as part of the onboarding process</div>
+  <div>The external ID has one requirement:</div>
+  <div>The external ID needs to be unique per customer</div>
+  <div>
+    This external ID is <i>not</i> a secret
+    <notes>This is a big pet peeve of mine</notes>
+  </div>
+  <div>This identifier is an "intent" token, it indicates the intent of the deputy</div>
+  <div>A great external ID is the customer number/id within the deputy's system</div>
+  <div></div>
+
+  <div>?</div>
