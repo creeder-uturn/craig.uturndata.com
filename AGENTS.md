@@ -66,14 +66,13 @@ cp -r template/ presentations/my-presentation/
 
 ### Draft presentations
 
-Mark a presentation as a draft to build it but exclude it from the landing page:
+Mark a presentation as a draft to build it but exclude it from the landing page by setting `draft: true` in metadata.yml:
 
-```bash
-# Mark as draft
-touch presentations/my-presentation/.draft
-
-# Remove draft status
-rm presentations/my-presentation/.draft
+```yaml
+title: "My Presentation"
+description: "Work in progress"
+date: "January 2024"
+draft: true  # Set to false to publish
 ```
 
 **Draft presentations:**
@@ -81,6 +80,8 @@ rm presentations/my-presentation/.draft
 - ✅ Are accessible by direct URL (e.g., `/my-presentation/`)
 - ✅ Work with `./serve.sh my-presentation`
 - ❌ Do NOT appear on the landing page index
+
+**To publish**: Change `draft: false` in metadata.yml
 
 ## Project Architecture
 
@@ -90,6 +91,7 @@ rm presentations/my-presentation/.draft
 presentations/             # Source presentations (committed to git)
   ├── example/             # Individual presentation
   │   ├── slides.md        # Markdown slides
+  │   ├── metadata.yml     # Presentation metadata
   │   ├── mkslides.yml     # Configuration
   │   ├── custom.css       # Custom styling
   │   ├── .draft           # Optional: marks as draft
@@ -99,9 +101,16 @@ presentations/             # Source presentations (committed to git)
 
 template/                  # Template for new presentations
   ├── slides.md            # Basic slide structure
+  ├── metadata.yml         # Metadata template (draft: true by default)
   ├── mkslides.yml         # Standard configuration
-  ├── custom.css           # Default styles
-  └── .draft               # New presentations are drafts by default
+  └── custom.css           # Default styles
+
+site/                      # Site-level templates and assets
+  ├── index.html.j2        # Landing page Jinja2 template
+  └── style.css            # Landing page styles (dark mode)
+
+scripts/                   # Build scripts
+  └── generate_index_data.py  # Collects metadata for landing page
 
 public/                    # Build output (gitignored, not committed)
   ├── index.html           # Landing page
@@ -121,7 +130,12 @@ legacy/                    # Legacy presentations (not mkslides)
   └── workflows/
       └── deploy.yml       # Deployment workflow
 
+site/                      # Site-level templates and assets
+  ├── index.html.j2        # Landing page template
+  └── style.css            # Landing page styles (dark mode)
+
 scripts/
+  ├── generate_index_data.py  # Collects metadata for landing page
   └── present-w-big.sh     # Legacy script for "big" presentations
 ```
 
@@ -131,11 +145,30 @@ Each presentation in `presentations/` follows this pattern:
 ```
 <deck-name>/
 ├── slides.md           # Markdown source with slides separated by ---
+├── metadata.yml        # Presentation metadata (title, description, date, draft)
 ├── mkslides.yml        # Configuration (theme, plugins, reveal.js options)
 ├── custom.css          # Custom styling
-├── .draft              # Optional: marks as draft (hidden from landing page)
 └── assets/             # Optional: images and media
 ```
+
+### Presentation Metadata
+
+Each presentation should have a `metadata.yml` file containing:
+
+```yaml
+title: "Human-Friendly Presentation Title"
+description: "Brief description of the presentation content"
+date: "Month YYYY"  # e.g., "January 2024"
+draft: false  # true to hide from landing page, false to publish
+```
+
+**Purpose**: This metadata is used to generate the landing page with rich presentation information.
+
+**Behavior**:
+- If `metadata.yml` is missing, the folder name is used as the title and presentation is treated as published
+- Empty or missing fields are handled gracefully
+- Draft presentations (`draft: true`) are excluded from the landing page but still built
+- Legacy presentations in `legacy/` can also have metadata.yml for custom titles and descriptions
 
 ### Markdown Format (slides.md)
 
@@ -196,9 +229,38 @@ The build.sh script performs these steps:
 3. **Share assets**: Move first deck's mkslides-assets/ to `public/` root, remove duplicates from other decks
 4. **Fix paths**: Update all deck HTML files to reference shared `../mkslides-assets/`
 5. **Rename**: Convert `slides.html` → `index.html` for clean URLs
-6. **Generate landing page**: Create index.html listing all presentations (excluding drafts)
+6. **Generate landing page**: Uses Jinja2 templating
+   - Python script (`scripts/generate_index_data.py`) collects metadata from all presentations
+   - Reads `metadata.yml` from each presentation directory
+   - Generates JSON data with presentation info (title, description, date, path)
+   - Jinja2 renders `site/index.html.j2` with this data
+   - Copies `site/style.css` to output directory
+   - Output: `public/index.html` with styled presentation cards
 7. **Copy legacy**: Copy legacy presentations to public/legacy/
 8. **Copy CNAME**: Copy .github/CNAME to public/
+
+### Landing Page Generation Details
+
+**Script**: `scripts/generate_index_data.py`
+- Reads `metadata.yml` from each presentation directory (including legacy/)
+- Collects presentation information (title, description, date, draft status)
+- Excludes draft presentations (`draft: true` in metadata.yml)
+- Includes legacy presentations with special badge
+- Sorts: modern first, then legacy; within each group by date (newest first), then alphabetically
+
+**Template**: `site/index.html.j2`
+- Jinja2 template for landing page HTML structure
+- References `style.css` for styling
+
+**Stylesheet**: `site/style.css`
+- Dark mode color scheme using CSS variables
+- Responsive card layout
+- Hover effects and transitions
+- Easy to customize via CSS variables in `:root`
+
+**Dependencies**:
+- `jinja2-cli` (via uvx, no permanent install)
+- `pyyaml` (via uvx, for reading YAML metadata)
 
 ## Deployment
 

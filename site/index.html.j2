@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Presentations - Craig Reeder</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Presentations</h1>
+        <p class="subtitle">Technical talks and workshops by <a target="_blank" href="https://cwr.io">Craig Reeder</a></p>
+    </header>
+
+    <main class="presentations">
+        {% for presentation in presentations %}
+        <article class="presentation-card">
+            <h2 class="presentation-title">
+                <a href="{{ presentation.path }}/">{{ presentation.title }}</a>
+            </h2>
+
+            <div class="presentation-meta">
+                {% if presentation.date %}
+                <time datetime="{{ presentation.date }}">{{ presentation.date }}</time>
+                {% endif %}
+                {% if presentation.is_legacy %}
+                <span class="legacy-badge">legacy format</span>
+                {% endif %}
+            </div>
+
+            {% if presentation.description %}
+            <p class="presentation-description">{{ presentation.description }}</p>
+            {% endif %}
+        </article>
+        {% endfor %}
+    </main>
+
+    <footer>
+        <p>Built with <a href="https://martenbe.github.io/mkslides/" target="_blank">MkSlides</a>, <a href="https://github.com/astral-sh/uv" target="_blank">uv</a>, <a href="https://revealjs.com/" target="_blank">Reveal.js</a>, and <a href="https://pages.github.com/" target="_blank">GitHub Pages</a></p>
+    </footer>
+</body>
+</html>

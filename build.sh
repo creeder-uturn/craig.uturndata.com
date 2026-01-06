@@ -52,70 +52,16 @@ if [ -d "$OUTPUT_DIR/$first_deck/mkslides-assets" ]; then
     done
 fi
 
-# Step 4: Generate landing page index
+# Step 4: Generate landing page using Jinja2 template
 echo "Generating landing page..."
-cat > "$OUTPUT_DIR/index.html" << 'EOF'
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Presentations - Craig Reeder</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            line-height: 1.6;
-        }
-        h1 { color: #333; }
-        ul { list-style: none; padding: 0; }
-        li { margin: 15px 0; }
-        a { color: #0066cc; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-    </style>
-</head>
-<body>
-    <h1>Presentations</h1>
-    <ul>
-EOF
+uvx --with pyyaml --from jinja2-cli jinja2 \
+    site/index.html.j2 \
+    --format=json \
+    <(uvx --with pyyaml python scripts/generate_index_data.py "$SLIDES_SOURCE" "$LEGACY_SOURCE") \
+    > "$OUTPUT_DIR/index.html"
 
-for deck_dir in "$SLIDES_SOURCE"/*; do
-    if [ ! -d "$deck_dir" ]; then
-        continue
-    fi
-    deck_name=$(basename "$deck_dir")
-
-    # Skip drafts (presentations with a .draft file)
-    if [ -f "$deck_dir/.draft" ]; then
-        continue
-    fi
-
-    echo "        <li><a href=\"$deck_name/\">$deck_name</a></li>" >> "$OUTPUT_DIR/index.html"
-done
-
-# Add legacy presentations to landing page if they exist
-if [ -d "$LEGACY_SOURCE" ]; then
-    for legacy_dir in "$LEGACY_SOURCE"/*; do
-        if [ ! -d "$legacy_dir" ]; then
-            continue
-        fi
-        legacy_name=$(basename "$legacy_dir")
-        echo "        <li><a href=\"legacy/$legacy_name/\">$legacy_name</a> <span style=\"color: #999; font-size: 0.9em;\">(legacy)</span></li>" >> "$OUTPUT_DIR/index.html"
-    done
-fi
-
-cat >> "$OUTPUT_DIR/index.html" << 'EOF'
-    </ul>
-    <footer>
-        <p style="font-size: small; color: #666; margin-top: 3em;">
-            Built with <a href="https://martenbe.github.io/mkslides/" target="_blank">MkSlides</a>
-        </p>
-    </footer>
-</body>
-</html>
-EOF
+# Copy site assets (CSS, etc.)
+cp site/style.css "$OUTPUT_DIR/"
 
 # Step 5: Copy legacy presentations
 if [ -d "$LEGACY_SOURCE" ]; then
@@ -133,14 +79,20 @@ echo ""
 echo "✅ Build complete!"
 echo "📁 Output directory: $OUTPUT_DIR"
 echo ""
-echo "🎤 Presentations built:"
+echo "🎤 Presentations:"
 for deck_dir in "$SLIDES_SOURCE"/*; do
     if [ ! -d "$deck_dir" ]; then
         continue
     fi
     deck_name=$(basename "$deck_dir")
-    if [ -f "$deck_dir/.draft" ]; then
-        echo "  - $deck_name (draft)"
+
+    # Check draft status from metadata.yml
+    if [ -f "$deck_dir/metadata.yml" ]; then
+        if grep -q "^draft: *true" "$deck_dir/metadata.yml"; then
+            echo "  - $deck_name (draft)"
+        else
+            echo "  - $deck_name"
+        fi
     else
         echo "  - $deck_name"
     fi

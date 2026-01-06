@@ -60,8 +60,9 @@ Visit [craig.uturndata.com](https://craig.uturndata.com) to see all available pr
    ```
 
 5. **Publish** (remove draft status):
-   ```bash
-   rm presentations/my-presentation/.draft
+   Edit `presentations/my-presentation/metadata.yml` and change:
+   ```yaml
+   draft: false
    ```
 
 6. **Deploy**: Commit and push to main - GitHub Actions deploys automatically
@@ -74,25 +75,45 @@ presentations/    # Your presentation sources (markdown)
 └── ...
 
 template/         # Template for new presentations
+site/             # Site-level templates (landing page)
 legacy/           # Legacy presentations (not mkslides)
 public/           # Build output (auto-generated, not in git)
 ```
 
 ## Draft vs Published
 
-New presentations are **drafts** by default:
+New presentations are **drafts** by default (`draft: true` in metadata.yml):
 - They build and are accessible by direct URL
 - They **don't** appear on the landing page
-- Remove the `.draft` file when ready to publish
+- Set `draft: false` in metadata.yml when ready to publish
 
 ## Customization
 
 Each presentation can have:
+- `metadata.yml` - Presentation metadata (title, description, date)
 - `mkslides.yml` - Configure theme, transitions, plugins
 - `custom.css` - Custom styling
 - `assets/` - Images and media files
 
 See the `template/` folder for examples.
+
+### Presentation Metadata
+
+Each presentation should have a `metadata.yml` file for the landing page:
+
+```yaml
+title: "Your Presentation Title"
+description: "A brief description of what this presentation covers"
+date: "January 2024"
+```
+
+**Fields:**
+- `title`: Human-friendly title (displayed on landing page)
+- `description`: Brief summary of the presentation content
+- `date`: Month and year (e.g., "January 2024")
+- `draft`: Set to `true` to hide from landing page, `false` to publish
+
+Presentations without metadata will use the folder name as the title and be treated as published (draft: false).
 
 ### Using Custom CSS Classes
 
@@ -168,8 +189,7 @@ $EDITOR presentations/my-talk/slides.md
 # Build all presentations
 ./build.sh
 
-# Publish (remove draft status)
-rm presentations/my-talk/.draft
+# Publish (set draft: false in metadata.yml)
 
 # Commit and push to deploy
 ```
