@@ -182,7 +182,8 @@ Running `./build.sh` does the following:
 4. **Renames** `slides.html` to `index.html` for clean URLs
 5. **Generates** the landing page index listing all non-draft presentations
 6. **Copies** legacy presentations from `legacy/`
-7. **Copies** the CNAME file for custom domain support
+7. **Copies** static files from `site/static/` to the site root
+8. **Copies** the CNAME file for custom domain support
 
 The `public/` directory is excluded from git - it's regenerated on every build.
 
