@@ -75,7 +75,7 @@ presentations/    # Your presentation sources (markdown)
 └── ...
 
 template/         # Template for new presentations
-site/             # Site-level templates (landing page)
+site/             # Site-level templates, assets, and static files
 legacy/           # Legacy presentations (not mkslides)
 public/           # Build output (auto-generated, not in git)
 ```
@@ -86,6 +86,35 @@ New presentations are **drafts** by default (`draft: true` in metadata.yml):
 - They build and are accessible by direct URL
 - They **don't** appear on the landing page
 - Set `draft: false` in metadata.yml when ready to publish
+
+## Static Files
+
+The `site/static/` directory is for files that should be copied to the root of the published site:
+
+```bash
+site/static/
+├── favicon.ico       # Site favicon
+├── robots.txt        # Search engine directives
+└── images/           # Static images
+    └── logo.png
+```
+
+Files in `site/static/` are copied to `public/` during build, accessible at the site root (e.g., `https://craig.uturndata.com/favicon.ico`).
+
+## External Presentations
+
+You can add links to presentations hosted elsewhere by editing `site/external.yml`:
+
+```yaml
+- title: "My Conference Talk"
+  description: "A talk I gave about cloud architecture"
+  date: "March 2023"
+  url: "https://youtube.com/watch?v=..."
+  badge: "video"  # Optional: custom badge (default: "external")
+  order: 1  # Optional: control display order
+```
+
+External presentations appear on the landing page alongside local presentations, sorted with modern presentations first.
 
 ## Customization
 
@@ -112,6 +141,9 @@ date: "January 2024"
 - `description`: Brief summary of the presentation content
 - `date`: Month and year (e.g., "January 2024")
 - `draft`: Set to `true` to hide from landing page, `false` to publish
+- `order`: Optional integer for custom sort order (lower numbers appear first)
+
+**Sorting**: Presentations with an `order` value appear first (ascending by order number), followed by presentations without order (sorted by date). Gaps in order values are acceptable (e.g., 1, 5, 10, 100).
 
 Presentations without metadata will use the folder name as the title and be treated as published (draft: false).
 

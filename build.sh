@@ -60,16 +60,19 @@ uvx --with pyyaml --from jinja2-cli jinja2 \
     <(uvx --with pyyaml python scripts/generate_index_data.py "$SLIDES_SOURCE" "$LEGACY_SOURCE") \
     > "$OUTPUT_DIR/index.html"
 
-# Copy site assets (CSS, etc.)
-cp site/style.css "$OUTPUT_DIR/"
-
 # Step 5: Copy legacy presentations
 if [ -d "$LEGACY_SOURCE" ]; then
     echo "Copying legacy presentations..."
     cp -r "$LEGACY_SOURCE" "$OUTPUT_DIR/"
 fi
 
-# Step 6: Copy CNAME for GitHub Pages custom domain
+# Step 6: Copy static files
+if [ -d "site/static" ]; then
+    echo "Copying static files..."
+    cp -r site/static/* "$OUTPUT_DIR/" 2>/dev/null || true
+fi
+
+# Step 7: Copy CNAME for GitHub Pages custom domain
 if [ -f ".github/CNAME" ]; then
     echo "Copying CNAME file..."
     cp .github/CNAME "$OUTPUT_DIR/"

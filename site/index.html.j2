@@ -16,7 +16,11 @@
         {% for presentation in presentations %}
         <article class="presentation-card">
             <h2 class="presentation-title">
+                {% if presentation.is_external %}
+                <a href="{{ presentation.path }}" target="_blank" rel="noopener noreferrer">{{ presentation.title }}</a>
+                {% else %}
                 <a href="{{ presentation.path }}/">{{ presentation.title }}</a>
+                {% endif %}
             </h2>
 
             <div class="presentation-meta">
@@ -25,6 +29,9 @@
                 {% endif %}
                 {% if presentation.is_legacy %}
                 <span class="legacy-badge">legacy format</span>
+                {% endif %}
+                {% if presentation.is_external %}
+                <span class="legacy-badge">{{ presentation.external_badge }}</span>
                 {% endif %}
             </div>
 

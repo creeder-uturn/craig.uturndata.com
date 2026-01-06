@@ -83,6 +83,52 @@ draft: true  # Set to false to publish
 
 **To publish**: Change `draft: false` in metadata.yml
 
+### External presentations
+
+Add links to presentations hosted elsewhere (YouTube, SlideShare, etc.) by editing `site/external.yml`:
+
+```yaml
+- title: "Talk at CloudConf 2023"
+  description: "Discussing serverless architecture patterns"
+  date: "March 2023"
+  url: "https://youtube.com/watch?v=..."
+  badge: "video"  # Optional: custom badge text (default: "external")
+  order: 1  # Optional: control display order
+
+- title: "Workshop Materials"
+  description: "Terraform hands-on workshop slides"
+  date: "June 2023"
+  url: "https://slides.example.com/workshop"
+  badge: "slides"
+  order: 10
+```
+
+**Features:**
+- External links open in new tabs
+- Custom badges to indicate content type (video, slides, etc.)
+- Sorted alongside local presentations
+- Full metadata support (title, description, date, order)
+
+### Custom Sort Order
+
+Use the `order` field to control the display order of presentations:
+
+```yaml
+# In metadata.yml or external.yml
+order: 5  # Lower numbers appear first
+```
+
+**Behavior:**
+- Presentations with an `order` value sort first (ascending)
+- Presentations without `order` sort after those with order
+- Gaps are acceptable (e.g., 1, 5, 10, 100)
+- Works for all presentation types (local, external, legacy)
+
+**Example sort order:**
+- Wizard's Guide (order: 5)
+- Git 101 (order: 10)
+- Terraform (no order, sorted by date/title)
+
 ## Project Architecture
 
 ### Folder Structure
@@ -105,9 +151,12 @@ template/                  # Template for new presentations
   ├── mkslides.yml         # Standard configuration
   └── custom.css           # Default styles
 
-site/                      # Site-level templates and assets
+site/                      # Site-level templates and configuration
   ├── index.html.j2        # Landing page Jinja2 template
-  └── style.css            # Landing page styles (dark mode)
+  ├── external.yml         # External presentation links
+  └── static/              # Static files (copied to public/ root)
+      ├── style.css        # Landing page styles (dark mode)
+      └── .gitkeep         # Placeholder
 
 scripts/                   # Build scripts
   └── generate_index_data.py  # Collects metadata for landing page
@@ -160,6 +209,7 @@ title: "Human-Friendly Presentation Title"
 description: "Brief description of the presentation content"
 date: "Month YYYY"  # e.g., "January 2024"
 draft: false  # true to hide from landing page, false to publish
+order: 1  # Optional: integer for custom sort order (lower numbers first)
 ```
 
 **Purpose**: This metadata is used to generate the landing page with rich presentation information.
@@ -234,29 +284,32 @@ The build.sh script performs these steps:
    - Reads `metadata.yml` from each presentation directory
    - Generates JSON data with presentation info (title, description, date, path)
    - Jinja2 renders `site/index.html.j2` with this data
-   - Copies `site/style.css` to output directory
    - Output: `public/index.html` with styled presentation cards
 7. **Copy legacy**: Copy legacy presentations to public/legacy/
-8. **Copy CNAME**: Copy .github/CNAME to public/
+8. **Copy static files**: Copy contents of `site/static/` to public/ root (favicon, robots.txt, etc.)
+9. **Copy CNAME**: Copy .github/CNAME to public/
 
 ### Landing Page Generation Details
 
 **Script**: `scripts/generate_index_data.py`
 - Reads `metadata.yml` from each presentation directory (including legacy/)
+- Reads `site/external.yml` for external presentation links
 - Collects presentation information (title, description, date, draft status)
 - Excludes draft presentations (`draft: true` in metadata.yml)
-- Includes legacy presentations with special badge
-- Sorts: modern first, then legacy; within each group by date (newest first), then alphabetically
+- Includes legacy presentations with "legacy format" badge
+- Includes external presentations with custom badges (e.g., "video", "slides")
+- Sorts: by `order` field (if present, ascending), then by type (modern/external/legacy), then by date (newest first), then alphabetically by title
 
 **Template**: `site/index.html.j2`
 - Jinja2 template for landing page HTML structure
 - References `style.css` for styling
 
-**Stylesheet**: `site/style.css`
+**Stylesheet**: `site/static/style.css`
 - Dark mode color scheme using CSS variables
 - Responsive card layout
 - Hover effects and transitions
 - Easy to customize via CSS variables in `:root`
+- Copied to `public/style.css` during build
 
 **Dependencies**:
 - `jinja2-cli` (via uvx, no permanent install)

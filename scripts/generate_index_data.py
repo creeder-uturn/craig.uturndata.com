@@ -5,6 +5,8 @@ import sys
 from pathlib import Path
 import yaml
 
+EXTERNAL_FILE = "site/external.yml"
+
 def load_metadata(presentation_dir):
     """Load metadata from metadata.yml."""
     metadata_file = presentation_dir / "metadata.yml"
@@ -13,6 +15,30 @@ def load_metadata(presentation_dir):
 
     with open(metadata_file) as f:
         return yaml.safe_load(f) or {}
+
+def load_external_presentations():
+    """Load external presentations from external.yml."""
+    external_file = Path(EXTERNAL_FILE)
+    if not external_file.exists():
+        return []
+
+    with open(external_file) as f:
+        external = yaml.safe_load(f) or []
+
+    result = []
+    for item in external:
+        result.append({
+            "path": item.get("url", "#"),
+            "title": item.get("title", "Untitled"),
+            "description": item.get("description", ""),
+            "date": item.get("date", ""),
+            "order": item.get("order"),
+            "is_legacy": False,
+            "is_external": True,
+            "external_badge": item.get("badge", "external")
+        })
+
+    return result
 
 def get_presentations(slides_source, legacy_source):
     """Collect presentation data from presentations and legacy folders."""
@@ -36,7 +62,9 @@ def get_presentations(slides_source, legacy_source):
                 "title": metadata.get("title", deck_dir.name),
                 "description": metadata.get("description", ""),
                 "date": metadata.get("date", ""),
-                "is_legacy": False
+                "order": metadata.get("order"),
+                "is_legacy": False,
+                "is_external": False
             })
 
     # Process legacy presentations
@@ -57,13 +85,20 @@ def get_presentations(slides_source, legacy_source):
                 "title": metadata.get("title", legacy_dir.name),
                 "description": metadata.get("description", ""),
                 "date": metadata.get("date", ""),
-                "is_legacy": True
+                "order": metadata.get("order"),
+                "is_legacy": True,
+                "is_external": False
             })
 
-    # Sort: modern presentations first, then legacy (by is_legacy)
-    # Within each: dated first, then by date, then by title
+    # Process external presentations
+    presentations.extend(load_external_presentations())
+
+    # Sort: by order (if present), then by type, then by date, then by title
     presentations.sort(key=lambda p: (
-        p["is_legacy"],      # False (modern) before True (legacy)
+        p["order"] is None,  # False (has order) before True (no order)
+        p["order"] if p["order"] is not None else 0,  # Ascending order value
+        p["is_legacy"],      # False (modern/external) before True (legacy)
+        p["is_external"],    # False (modern) before True (external)
         p["date"] == "",     # False (has date) before True (no date)
         p["date"],           # Alphabetical date sort
         p["title"]           # Alphabetical title sort

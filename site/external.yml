@@ -1,0 +1,16 @@
+# External presentations hosted elsewhere
+# These will appear on the landing page with a custom badge
+#
+# Format:
+# - title: "Presentation Title"
+#   description: "Brief description"
+#   date: "Month YYYY"
+#   url: "https://example.com/presentation"
+#   badge: "video"  # Optional: custom badge text (default: "external")
+#   order: 1  # Optional: integer for custom sort order (lower numbers appear first)
+
+- title: "The Wizard's Guide to Well-Architected IaC Workloads"
+  description: "An approach for designing and implementing infrastructure as code workloads using best practices"
+  date: "July 2025"
+  url: "https://github.com/creeder-uturn/wizardworkloads"
+  order: 5
