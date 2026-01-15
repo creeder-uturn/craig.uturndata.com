@@ -54,10 +54,9 @@ fi
 
 # Step 4: Generate landing page using Jinja2 template
 echo "Generating landing page..."
-uvx --with pyyaml --from jinja2-cli jinja2 \
-    site/index.html.j2 \
-    --format=json \
-    <(uvx --with pyyaml python scripts/generate_index_data.py "$SLIDES_SOURCE" "$LEGACY_SOURCE") \
+uvx --with pyyaml --with jinja2 python scripts/generate_index_data.py \
+    "$SLIDES_SOURCE" "$LEGACY_SOURCE" \
+    --render site/index.html.j2 \
     > "$OUTPUT_DIR/index.html"
 
 # Step 5: Copy legacy presentations

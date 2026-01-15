@@ -4,6 +4,7 @@ import json
 import sys
 from pathlib import Path
 import yaml
+from jinja2 import Template
 
 EXTERNAL_FILE = "site/external.yml"
 
@@ -107,8 +108,8 @@ def get_presentations(slides_source, legacy_source):
     return presentations
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Usage: generate_index_data.py <slides_source> <legacy_source>", file=sys.stderr)
+    if len(sys.argv) < 3:
+        print("Usage: generate_index_data.py <slides_source> <legacy_source> [--render <template_file>]", file=sys.stderr)
         sys.exit(1)
 
     slides_source = sys.argv[1]
@@ -118,4 +119,21 @@ if __name__ == "__main__":
         "presentations": get_presentations(slides_source, legacy_source)
     }
 
-    print(json.dumps(data, indent=2))
+    # Check if --render flag is provided
+    if len(sys.argv) > 3 and sys.argv[3] == "--render":
+        if len(sys.argv) < 5:
+            print("Error: --render requires a template file path", file=sys.stderr)
+            sys.exit(1)
+
+        template_file = Path(sys.argv[4])
+        if not template_file.exists():
+            print(f"Error: Template file not found: {template_file}", file=sys.stderr)
+            sys.exit(1)
+
+        # Render the template
+        with open(template_file) as f:
+            template = Template(f.read())
+        print(template.render(**data))
+    else:
+        # Output JSON
+        print(json.dumps(data, indent=2))
