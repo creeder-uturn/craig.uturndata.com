@@ -78,6 +78,17 @@ h1 {
     color: var(--link);
 }
 
+.print-pdf-link {
+    color: var(--link);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.print-pdf-link:hover {
+    text-decoration: underline;
+}
+
 .presentation-meta {
     display: flex;
     gap: 1rem;
