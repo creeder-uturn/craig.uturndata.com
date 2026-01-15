@@ -105,9 +105,28 @@ You can order pizza with OpenTofu
 
 ---
 
+# Configuring a Provider
+
+```hcl
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = "us-east-1"
+}
+```
+
+---
+
 # What is a Resource?
 
-A resource is one or more infrastructure objects that is implemented by the provider
+A resource is an infrastructure object that is managed by the provider
 
 ---
 
@@ -170,11 +189,19 @@ aws_instance.example.private_ip
 
 ---
 
+# Resource Dependencies
+
+OpenTofu automatically determines the order to create resources
+
+When one resource references another, OpenTofu knows to create them in the correct order
+
+---
+
 # How do I know which parameters and attributes exist?
 
 ---
 
-# The Terraforn & OpenTofu Registries have provider documentation
+# The Terraform & OpenTofu Registries have provider documentation
 
 ---
 
@@ -227,7 +254,7 @@ If a variable doesn't have a default and isn't set it will prompt you on apply
 
 # Local Values
 
-Local values allow for a static value to be set during runtime
+Local values allow for computed or specified values to be defined once and reused
 
 Note: These are kind of like constants in other programming languages
 
@@ -334,6 +361,21 @@ This enables collaboration and safety
 
 ---
 
+# Configuring Remote State
+
+```hcl
+terraform {
+  backend "s3" {
+    bucket        = "my-terraform-state"
+    key           = "project/terraform.tfstate"
+    region        = "us-east-1"
+    use_lockfile  = true
+  }
+}
+```
+
+---
+
 # Modules
 
 Modules allow you to reuse OpenTofu code multiple times, in multiple places
@@ -383,7 +425,7 @@ module.servers.ip_list
 
 # How do you use a module?
 
-To know a modules *parameters* and *attributes*, you need to refer to it's documentation (or code)
+To know a modules *parameters* and *attributes*, you need to refer to its documentation (or code)
 
 ---
 
@@ -440,6 +482,28 @@ $ tf apply
 ```
 
 This will prompt you for confirmation
+
+---
+
+# Idempotency
+
+Running `tf apply` multiple times with the same configuration will not recreate resources
+
+OpenTofu only makes changes when the desired state differs from the actual state
+
+---
+
+# Tear it all down!
+```bash
+$ tf destroy
+```
+
+This is dangerous, as it will destroy everything if you confirm.
+
+---
+
+# Do not destroy
+Outside of sandbox/testing environments, it is not recommended to run destroy. Instead, remove the resources that are no longer needed from the code and let an apply destroy them.
 
 ---
 
