@@ -115,7 +115,7 @@ A resource is one or more infrastructure objects that is implemented by the prov
 
 ---
 
-```javascript
+```hcl
 resource "aws_instance" "example" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = "t3.micro"
@@ -138,7 +138,7 @@ Parameters are for configuring a resource
 
 `ami`, `instance_type`, and `tags` are parameters here
 
-```javascript
+```hcl
 resource "aws_instance" "example" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = "t3.micro"
@@ -159,7 +159,7 @@ Attributes get information out of a resource
 
 `private_ip` is the attribute here
 
-```javascript
+```hcl
 resource "aws_instance" "example" {
   ...
 }
@@ -194,7 +194,7 @@ Input variables allow for changing configuration values
 
 ---
 
-```javascript
+```hcl
 variable "username" {
   type = string
   description = "Username to apply the changes to"
@@ -233,7 +233,7 @@ Note: These are kind of like constants in other programming languages
 
 ---
 
-```javascript
+```hcl
 locals {
   department = "Operations"
   # ...
@@ -258,7 +258,7 @@ Note: They allow you to get information out of the tf easily
 
 ---
 
-```javascript
+```hcl
 output "public_ip" {
   value = aws_instance.example.public_ip
 }
@@ -280,7 +280,7 @@ A common data source is to get the most recent version of an AMI
 
 ---
 
-```javascript
+```hcl
 data "aws_ami" "windows_server_2019" {
   most_recent = true
   owners      = ["amazon"]
@@ -364,7 +364,7 @@ Note: This tells OpenTofu where to find the code for a module
 
 ---
 
-```javascript
+```hcl
 # This is just an identifier for local access,
 # not the name of the module
 module "servers" {

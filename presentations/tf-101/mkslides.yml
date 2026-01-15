@@ -1,6 +1,6 @@
 slides:
   theme: moon
-  highlight_theme: monokai
+  highlight_theme: vs2015
   separator_notes: '^Note:'
 
 revealjs:
@@ -12,3 +12,7 @@ revealjs:
 plugins:
   - extra_css:
       - custom.css
+  - name: TerraformHighlighting
+    extra_javascript:
+      - terraform.js
+      - terraform-plugin.js
