@@ -101,7 +101,7 @@ h1 {
     color: var(--text);
 }
 
-.legacy-badge {
+.external-badge {
     color: var(--text-muted);
     font-size: 0.9rem;
     font-style: italic;

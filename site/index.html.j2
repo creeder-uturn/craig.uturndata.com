@@ -28,10 +28,10 @@
                 <time datetime="{{ presentation.date }}">{{ presentation.date }}</time>
                 {% endif %}
                 {% if presentation.is_legacy %}
-                <span class="legacy-badge">legacy format</span>
+                <span class="external-badge">legacy format</span>
                 {% endif %}
                 {% if presentation.is_external %}
-                <span class="legacy-badge">{{ presentation.external_badge }}</span>
+                <span class="external-badge">{{ presentation.external_badge }}</span>
                 {% endif %}
                 {% if not presentation.is_external %}
                 <a href="{{ presentation.path }}/?print-pdf" class="print-pdf-link">PDF printable version</a>
