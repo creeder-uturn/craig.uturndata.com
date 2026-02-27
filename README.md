@@ -263,11 +263,14 @@ task new my-talk
 # Edit slides
 $EDITOR presentations/my-talk/slides.md
 
-# Preview with auto-reload
-task serve-presentation my-talk
-
-# Build and serve entire site
+# Serve entire site with auto-reload
 task serve
+
+# Serve specific presentation with auto-reload
+task serve my-talk
+
+# Build without serving
+task build
 
 # Clean build directory
 task clean
@@ -276,8 +279,16 @@ task clean
 Or using shell scripts directly:
 
 ```bash
+# Create new presentation
 ./new.sh my-talk
+
+# Serve specific presentation
 ./serve.sh my-talk
+
+# Serve entire website with auto-reload
+./serve.sh
+
+# Build only
 ./build.sh
 ```
 
