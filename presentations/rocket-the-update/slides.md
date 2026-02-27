@@ -1,5 +1,15 @@
 # Rocket³
 
+🚀 The Update
+
+---
+
+<!-- .slide: class="no-bullets" -->
+### What we'll cover
+- ✅ Completed initiatives
+- 🚧 In progress
+- 🚀 What's next
+
 ---
 
 ### Initial Focus
@@ -33,7 +43,7 @@ Note: Original meeting was April 8, 2025
 
 ### Still to come
 
-- 🚸 Rapid Launch improvements
+- 🚧 Rapid Launch improvements
   - Client deliverable documentation
   - Updates to Launch guide
 
@@ -41,7 +51,7 @@ Note: Original meeting was April 8, 2025
 
 ### Submariner
 
-- ✅ Combine efforts and compliment each other
+- ✅ Combine efforts and complement each other
   - Submariner title has been sunset and is now part of Rocketry
 - ✅ Data Engineers are maintaining Rocketry modules related to their disciplines
 - ✅ Regular coordination with Kenrick & DE Team
@@ -52,10 +62,9 @@ Note: Original meeting was April 8, 2025
 
 - ✅ Improve technical team member onboarding guide
 
-
 ---
 
-## Other accomplishments
+## 🎉 Bonus Wins!
 
 ---
 
@@ -78,7 +87,7 @@ Note: Style Guide was a previous long term goal
 
 ---
 
-### 🚀 Rocketing forward!
+### 🛸 Rocketing forward!
 
 - UTurn Glossary of Terms <!-- .element: class="fragment fade-up" -->
 - Rapid Launch Testing Accounts <!-- .element: class="fragment fade-up" -->
@@ -87,7 +96,7 @@ Note: Style Guide was a previous long term goal
 - Better Sales & Engineering Alignment <!-- .element: class="fragment fade-up" -->
 
 Note:
-- Product Development Council would be joining forces with the AI & Data teams to join focus on Launch Pads and Accelerators
+- Product Development Council would be joining forces with the AI & Data teams for Launch Pads and Accelerators
 
 - Glossary of Terms will help onboard new staff and help clear up language
 

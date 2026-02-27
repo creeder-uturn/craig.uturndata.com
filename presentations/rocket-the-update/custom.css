@@ -32,3 +32,20 @@
 .reveal .compact p {
   font-size: 0.7em !important;
 }
+
+.reveal .no-bullets ul {
+  list-style: none !important;
+}
+
+.reveal .no-bullets li {
+  margin-left: 0 !important;
+}
+
+/* Hide first-level bullets globally */
+.reveal .slides > section > ul {
+  list-style: none !important;
+}
+
+.reveal .slides > section > ul > li {
+  margin-left: 0 !important;
+}
