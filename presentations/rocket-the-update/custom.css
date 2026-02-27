@@ -33,19 +33,27 @@
   font-size: 0.7em !important;
 }
 
-.reveal .no-bullets ul {
+/* Hide top-level bullet points */
+.reveal ul {
   list-style: none !important;
 }
 
-.reveal .no-bullets li {
+.reveal li {
   margin-left: 0 !important;
 }
 
-/* Hide first-level bullets globally */
-.reveal .slides > section > ul {
+/* Show arrow emoji bullets for nested lists */
+.reveal ul ul {
   list-style: none !important;
 }
 
-.reveal .slides > section > ul > li {
-  margin-left: 0 !important;
+.reveal ul ul li {
+  margin-left: 0.25em !important;
+  padding-left: 0.1em !important;
+}
+
+.reveal ul ul li::before {
+  content: "→ ";
+  margin-left: -1em;
+  padding-right: 0.15em;
 }
