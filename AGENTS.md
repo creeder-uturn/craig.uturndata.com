@@ -262,6 +262,33 @@ plugins:
       - custom.css               # Additional CSS files
 ```
 
+### Available Themes
+
+**Reveal.js Presentation Themes** (for `theme:` field):
+
+Dark Themes:
+- `black` - Black background
+- `blood` - Dark background with blood red accents
+- `league` - Gray background with blue accents
+- `moon` - Dark blue/purple (default in this project)
+- `night` - Black background with orange accents
+- `solarized` - Solarized dark color scheme
+
+Light Themes:
+- `beige` - Beige background with brown text
+- `serif` - Cappuccino background with serif fonts
+- `simple` - White background, minimal styling
+- `sky` - Blue sky gradient background
+- `white` - White background with black text
+
+**Code Syntax Highlighting Themes** (for `highlight_theme:` field):
+- `monokai` - Dark theme with bright colors (commonly used in this project)
+- `vs2015` - Visual Studio 2015 dark theme
+- `github` - GitHub light theme
+- `atom-one-dark` - Atom editor dark theme
+- `zenburn` - Low-contrast dark theme
+- And many others supported by highlight.js
+
 ## Technology Stack
 
 - **mkslides**: Python-based tool (run via uvx) that generates Reveal.js presentations from markdown

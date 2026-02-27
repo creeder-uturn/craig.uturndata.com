@@ -147,6 +147,48 @@ date: "January 2024"
 
 Presentations without metadata will use the folder name as the title and be treated as published (draft: false).
 
+### Configuring Themes
+
+Each presentation can customize its appearance using the `mkslides.yml` configuration file:
+
+```yaml
+slides:
+  theme: moon                    # Reveal.js presentation theme
+  highlight_theme: monokai       # Code syntax highlighting theme
+  separator_notes: '^Note:'      # Pattern for speaker notes
+
+revealjs:
+  slideNumber: false             # Show/hide slide numbers
+  transition: slide              # Transition effect between slides
+  hash: true                     # URL hash navigation
+  controls: true                 # Show navigation controls
+```
+
+**Available Presentation Themes:**
+
+Dark themes:
+- `black` - Black background
+- `blood` - Dark with blood red accents
+- `league` - Gray with blue accents
+- `moon` - Dark blue/purple (default in this project)
+- `night` - Black with orange accents
+- `solarized` - Solarized dark
+
+Light themes:
+- `beige` - Beige with brown text
+- `serif` - Cappuccino with serif fonts
+- `simple` - White, minimal styling
+- `sky` - Blue sky gradient
+- `white` - White with black text
+
+**Code Highlighting Themes:**
+- `monokai` - Dark with bright colors (commonly used)
+- `vs2015` - Visual Studio dark
+- `github` - GitHub light
+- `atom-one-dark` - Atom editor dark
+- `zenburn` - Low-contrast dark
+- And many others supported by highlight.js
+
 ### Using Custom CSS Classes
 
 **For slides**, use the `.slide` HTML comment:
