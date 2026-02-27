@@ -13,7 +13,7 @@ This repository contains markdown-based presentation slides that are converted i
 Install the required dependencies using Homebrew:
 
 ```bash
-brew install uv
+brew install uv go-task
 ```
 
 > mkslides is run via uvx, so is not needed to be installed independently
@@ -251,20 +251,34 @@ No manual deployment needed - just push your changes.
 
 ## Development Workflow
 
+Using Task (recommended):
+
 ```bash
+# List all presentations with status
+task list
+
 # Create new presentation
-./new.sh my-talk
+task new my-talk
 
 # Edit slides
 $EDITOR presentations/my-talk/slides.md
 
 # Preview with auto-reload
-./serve.sh my-talk
+task serve-presentation my-talk
 
-# Build all presentations
-./build.sh
+# Build and serve entire site
+task serve
 
-# Publish (set draft: false in metadata.yml)
-
-# Commit and push to deploy
+# Clean build directory
+task clean
 ```
+
+Or using shell scripts directly:
+
+```bash
+./new.sh my-talk
+./serve.sh my-talk
+./build.sh
+```
+
+To publish, edit `presentations/my-talk/metadata.yml` and set `draft: false`.

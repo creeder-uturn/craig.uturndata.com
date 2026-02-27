@@ -1,0 +1,72 @@
+version: '3'
+
+vars:
+  SLIDES_SOURCE: presentations
+  OUTPUT_DIR: public
+  LEGACY_SOURCE: legacy
+  DEFAULT_PORT: 8000
+
+tasks:
+  default:
+    desc: Show available tasks (default)
+    cmds:
+      - task --list
+
+  build:
+    desc: Build the entire website
+    cmds:
+      - ./build.sh
+
+  serve:
+    desc: Serve the built website locally
+    deps: [build]
+    cmds:
+      - echo "Starting local server at http://localhost:{{.DEFAULT_PORT}}"
+      - uvx python -m http.server {{.DEFAULT_PORT}} -d {{.OUTPUT_DIR}}
+
+  clean:
+    desc: Clean the output directory
+    cmds:
+      - rm -rf {{.OUTPUT_DIR}}
+      - echo "✅ Cleaned {{.OUTPUT_DIR}}"
+
+  new:
+    desc: Create a new presentation from template
+    summary: |
+      Create a new presentation from the template.
+
+      Usage: task new <presentation-name>
+      Example: task new my-talk
+    cmds:
+      - ./new.sh {{.CLI_ARGS}}
+
+  serve-presentation:
+    desc: Serve a specific presentation with auto-reload
+    summary: |
+      Serve a single presentation with live auto-reload for development.
+
+      Usage: task serve-presentation <presentation-name>
+      Example: task serve-presentation git-101
+    cmds:
+      - ./serve.sh {{.CLI_ARGS}}
+
+  list:
+    desc: List all presentations
+    silent: true
+    cmds:
+      - echo -e "\033[36mPresentations:\033[0m"
+      - |
+        for deck_dir in {{.SLIDES_SOURCE}}/*; do
+          if [ -d "$deck_dir" ]; then
+            deck_name=$(basename "$deck_dir")
+            if [ -f "$deck_dir/metadata.yml" ]; then
+              if grep -q "^draft: *true" "$deck_dir/metadata.yml"; then
+                echo "  - $deck_name (draft)"
+              else
+                echo -e "  - \033[1m$deck_name\033[0m"
+              fi
+            else
+              echo -e "  - \033[1m$deck_name\033[0m"
+            fi
+          fi
+        done

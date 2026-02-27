@@ -101,4 +101,4 @@ for deck_dir in "$SLIDES_SOURCE"/*; do
 done
 echo ""
 echo "🌐 Preview locally:"
-echo "   python3 -m http.server -d $OUTPUT_DIR"
+echo "   uvx python -m http.server -d $OUTPUT_DIR"
