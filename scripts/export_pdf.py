@@ -17,15 +17,18 @@ def export_deck(port, deck_name):
     """Export a single deck to PDF."""
     pdf_output = f"{OUTPUT_DIR}/{deck_name}.pdf"
     print(f"Exporting '{deck_name}' to PDF...")
-    subprocess.run(
-        [
-            "npx", "--yes", "decktape", "reveal",
-            "--size", "1920x1080",
-            f"http://localhost:{port}/{deck_name}/",
-            pdf_output,
-        ],
-        check=True,
-    )
+    cmd = [
+        "npx", "--yes", "decktape", "reveal",
+        "--size", "1920x1080",
+    ]
+    # Chromium needs --no-sandbox in CI (unprivileged user namespaces restricted)
+    if os.environ.get("CI"):
+        cmd.append("--chrome-arg=--no-sandbox")
+    cmd += [
+        f"http://localhost:{port}/{deck_name}/",
+        pdf_output,
+    ]
+    subprocess.run(cmd, check=True)
     print(f"  -> {pdf_output}")
 
 
