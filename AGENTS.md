@@ -4,65 +4,69 @@ This file provides guidance to AI Assistants when working with code in this repo
 
 ## Project Overview
 
-This is a GitHub Pages site (craig.uturndata.com) hosting technical presentation decks. Presentations are created using mkslides (a Reveal.js-based presentation generator) that converts markdown files into interactive HTML presentations.
+This is a GitHub Pages site (craig.uturndata.com) hosting technical presentation decks. Presentations are created using mkslides (a Reveal.js-based presentation generator) that converts markdown files into interactive HTML presentations. PDF versions are generated asynchronously via decktape.
 
 ## Build and Development Commands
 
-### Building all presentations
-```bash
-./build.sh
-```
-This script:
-- Processes all presentation decks in the `presentations/` directory
-- Generates an index.html landing page listing all non-draft presentations
-- Outputs to `public/` directory
-- Renames `slides.html` to `index.html` for clean URLs
-- Copies legacy presentations from `legacy/` to `public/legacy/`
-- Copies CNAME from `.github/` to `public/` for GitHub Pages
+Development commands use [Task](https://taskfile.dev/) as a task runner. All tasks are defined in `Taskfile.yml`.
 
-### Local development server (single deck)
-```bash
-./serve.sh <deck-name>
-```
-Starts a development server with **auto-reload** for a specific deck at http://localhost:8000
+### Task commands
 
-Examples:
 ```bash
-./serve.sh example     # Serve the example presentation
-./serve.sh git-101     # Serve the git-101 presentation
+task                        # List available tasks
+task build                  # Build the entire website
+task serve                  # Serve entire website with auto-reload
+task serve -- git-101       # Serve specific presentation with auto-reload
+task new -- my-talk         # Create a new presentation from template
+task pdf                    # Export all presentations to PDF
+task pdf -- git-101         # Export a specific presentation to PDF
+task list                   # List all presentations
+task clean                  # Clean the output directory
 ```
 
-This serves one deck at a time with:
-- Live auto-reload when you edit slides.md, custom.css, or assets
-- For actively developing a presentation
+Note: Tasks that accept arguments require `--` before the argument (Taskfile convention for `CLI_ARGS`).
+
+### Direct script usage
+
+Scripts can also be run directly without Task:
+
+```bash
+./build.sh                              # Build the site
+./serve.sh git-101                      # Serve a specific presentation
+./new.sh my-talk                        # Create a new presentation
+python3 scripts/export_pdf.py           # Export all PDFs
+python3 scripts/export_pdf.py git-101   # Export a specific PDF
+```
+
+### PDF Export
+
+PDF export uses [decktape](https://github.com/astefanutti/decktape) (Puppeteer/headless Chromium) to capture Reveal.js presentations as PDFs.
+
+- `scripts/export_pdf.py` starts an in-process HTTP server, then runs decktape against each deck
+- PDFs are written to `public/<deck-name>.pdf` (e.g., `public/git-101.pdf`)
+- When exporting all decks, exports run in parallel via `ThreadPoolExecutor`
+- Requires Node.js 20+ (for Puppeteer compatibility)
+- The site must be built first (`public/` must contain the HTML decks)
 
 ### Creating a new presentation
 
-Use the `new.sh` script to create a presentation from the template:
-
 ```bash
-./new.sh my-presentation
+task new -- my-presentation
 ```
 
 This creates a new presentation with:
 - Basic slide structure in `slides.md`
 - Standard configuration in `mkslides.yml`
 - Custom CSS template
-- `.draft` file (marked as draft by default)
+- Marked as draft by default (`draft: true` in metadata.yml)
 
 Then:
 1. Edit `presentations/my-presentation/slides.md` with your content
 2. Customize `custom.css` if needed
-3. Test with: `./serve.sh my-presentation`
-4. Build with: `./build.sh`
-5. When ready to publish: `rm presentations/my-presentation/.draft`
+3. Test with: `task serve -- my-presentation`
+4. Build with: `task build`
+5. When ready to publish: set `draft: false` in `metadata.yml`
 6. Commit and push - GitHub Actions will deploy automatically
-
-**Manual creation (alternative):**
-If you prefer to create manually, copy from the template:
-```bash
-cp -r template/ presentations/my-presentation/
-```
 
 ### Draft presentations
 
@@ -76,10 +80,10 @@ draft: true  # Set to false to publish
 ```
 
 **Draft presentations:**
-- ✅ Are still built and included in `public/`
-- ✅ Are accessible by direct URL (e.g., `/my-presentation/`)
-- ✅ Work with `./serve.sh my-presentation`
-- ❌ Do NOT appear on the landing page index
+- Are still built and included in `public/`
+- Are accessible by direct URL (e.g., `/my-presentation/`)
+- Work with `task serve -- my-presentation`
+- Do NOT appear on the landing page index
 
 **To publish**: Change `draft: false` in metadata.yml
 
@@ -94,20 +98,7 @@ Add links to presentations hosted elsewhere (YouTube, SlideShare, etc.) by editi
   url: "https://youtube.com/watch?v=..."
   badge: "video"  # Optional: custom badge text (default: "external")
   order: 1  # Optional: control display order
-
-- title: "Workshop Materials"
-  description: "Terraform hands-on workshop slides"
-  date: "June 2023"
-  url: "https://slides.example.com/workshop"
-  badge: "slides"
-  order: 10
 ```
-
-**Features:**
-- External links open in new tabs
-- Custom badges to indicate content type (video, slides, etc.)
-- Sorted alongside local presentations
-- Full metadata support (title, description, date, order)
 
 ### Custom Sort Order
 
@@ -118,16 +109,9 @@ Use the `order` field to control the display order of presentations:
 order: 5  # Lower numbers appear first
 ```
 
-**Behavior:**
 - Presentations with an `order` value sort first (ascending)
 - Presentations without `order` sort after those with order
-- Gaps are acceptable (e.g., 1, 5, 10, 100)
 - Works for all presentation types (local, external, legacy)
-
-**Example sort order:**
-- Wizard's Guide (order: 5)
-- Git 101 (order: 10)
-- Terraform (no order, sorted by date/title)
 
 ## Project Architecture
 
@@ -135,38 +119,38 @@ order: 5  # Lower numbers appear first
 
 ```
 presentations/             # Source presentations (committed to git)
-  ├── example/             # Individual presentation
+  ├── git-101/             # Individual presentation
   │   ├── slides.md        # Markdown slides
   │   ├── metadata.yml     # Presentation metadata
   │   ├── mkslides.yml     # Configuration
   │   ├── custom.css       # Custom styling
-  │   ├── .draft           # Optional: marks as draft
   │   └── assets/          # Optional images/media
-  └── git-101/
-      └── ...
+  └── ...
 
 template/                  # Template for new presentations
-  ├── slides.md            # Basic slide structure
-  ├── metadata.yml         # Metadata template (draft: true by default)
-  ├── mkslides.yml         # Standard configuration
-  └── custom.css           # Default styles
+  ├── slides.md
+  ├── metadata.yml         # draft: true by default
+  ├── mkslides.yml
+  └── custom.css
 
 site/                      # Site-level templates and configuration
   ├── index.html.j2        # Landing page Jinja2 template
   ├── external.yml         # External presentation links
   └── static/              # Static files (copied to public/ root)
-      ├── style.css        # Landing page styles (dark mode)
-      └── .gitkeep         # Placeholder
+      └── style.css        # Landing page styles (dark mode)
 
-scripts/                   # Build scripts
-  └── generate_index_data.py  # Collects metadata for landing page
+scripts/                   # Build and utility scripts
+  ├── generate_index_data.py    # Collects metadata for landing page
+  ├── export_pdf.py             # PDF export via decktape
+  ├── list_presentations.py     # List all presentations
+  ├── serve_with_livereload.py  # Dev server with auto-reload
+  └── present-w-big.sh          # Legacy script for "big" presentations
 
 public/                    # Build output (gitignored, not committed)
   ├── index.html           # Landing page
-  ├── example/
-  │   └── index.html       # Renamed from slides.html
   ├── git-101/
   │   └── index.html
+  ├── git-101.pdf          # PDF version (generated by task pdf)
   ├── legacy/              # Copied from legacy/
   └── mkslides-assets/     # Shared Reveal.js assets
 
@@ -178,14 +162,6 @@ legacy/                    # Legacy presentations (not mkslides)
   ├── CNAME                # GitHub Pages custom domain
   └── workflows/
       └── deploy.yml       # Deployment workflow
-
-site/                      # Site-level templates and assets
-  ├── index.html.j2        # Landing page template
-  └── style.css            # Landing page styles (dark mode)
-
-scripts/
-  ├── generate_index_data.py  # Collects metadata for landing page
-  └── present-w-big.sh     # Legacy script for "big" presentations
 ```
 
 ### Presentation Deck Structure
@@ -212,35 +188,12 @@ draft: false  # true to hide from landing page, false to publish
 order: 1  # Optional: integer for custom sort order (lower numbers first)
 ```
 
-**Purpose**: This metadata is used to generate the landing page with rich presentation information.
-
-**Behavior**:
-- If `metadata.yml` is missing, the folder name is used as the title and presentation is treated as published
-- Empty or missing fields are handled gracefully
-- Draft presentations (`draft: true`) are excluded from the landing page but still built
-- Legacy presentations in `legacy/` can also have metadata.yml for custom titles and descriptions
-
 ### Markdown Format (slides.md)
 
 - **Slide separator**: `---` (triple dash on its own line)
 - **Speaker notes**: Lines starting with `Note:` (configurable via `separator_notes` in mkslides.yml)
 - Supports standard markdown formatting, images, code blocks
 - Supports Reveal.js-specific features like fragment animations
-
-Example:
-```markdown
-# Title Slide
-
----
-
-## Content Slide
-
-Some content here
-
-Note: This is a speaker note that won't appear on the slide
-
----
-```
 
 ### Configuration (mkslides.yml)
 
@@ -293,74 +246,54 @@ Light Themes:
 
 - **mkslides**: Python-based tool (run via uvx) that generates Reveal.js presentations from markdown
 - **Reveal.js**: JavaScript presentation framework (outputs are standalone HTML files)
+- **decktape**: PDF exporter using Puppeteer/headless Chromium (run via npx)
+- **Task**: Task runner for development commands
 - **GitHub Pages**: Hosting platform (deployed via GitHub Actions artifacts)
 
-## Build Process Workflow
+## Build Process
 
-The build.sh script performs these steps:
+The `build.sh` script performs these steps:
 
-1. **Clean**: Remove existing `public/` directory
-2. **Build each deck**: Build presentations from `presentations/` individually with their configs
-   - mkslides handles per-deck: custom mkslides.yml, assets/ folders, custom.css files
-   - Creates mkslides-assets/ in each deck's output
-3. **Share assets**: Move first deck's mkslides-assets/ to `public/` root, remove duplicates from other decks
-4. **Fix paths**: Update all deck HTML files to reference shared `../mkslides-assets/`
-5. **Rename**: Convert `slides.html` → `index.html` for clean URLs
-6. **Generate landing page**: Uses Jinja2 templating
-   - Python script (`scripts/generate_index_data.py`) collects metadata from all presentations
-   - Reads `metadata.yml` from each presentation directory
-   - Generates JSON data with presentation info (title, description, date, path)
-   - Jinja2 renders `site/index.html.j2` with this data
-   - Output: `public/index.html` with styled presentation cards
-7. **Copy legacy**: Copy legacy presentations to public/legacy/
-8. **Copy static files**: Copy contents of `site/static/` to public/ root (favicon, robots.txt, etc.)
-9. **Copy CNAME**: Copy .github/CNAME to public/
+1. **Selective clean**: Remove build artifacts from `public/` while preserving PDF files
+2. **Build each deck**: Run mkslides for each presentation in `presentations/`
+3. **Share assets**: Move mkslides-assets/ to `public/` root, update HTML paths to `../mkslides-assets/`
+4. **Generate landing page**: Python script collects metadata, Jinja2 renders `site/index.html.j2`
+5. **Copy legacy**: Copy legacy presentations to `public/legacy/`
+6. **Copy static files**: Copy `site/static/` contents to `public/`
+7. **Copy CNAME**: Copy `.github/CNAME` to `public/`
 
-### Landing Page Generation Details
+### Landing Page Generation
 
 **Script**: `scripts/generate_index_data.py`
 - Reads `metadata.yml` from each presentation directory (including legacy/)
 - Reads `site/external.yml` for external presentation links
-- Collects presentation information (title, description, date, draft status)
 - Excludes draft presentations (`draft: true` in metadata.yml)
 - Includes legacy presentations with "legacy format" badge
-- Includes external presentations with custom badges (e.g., "video", "slides")
-- Sorts: by `order` field (if present, ascending), then by type (modern/external/legacy), then by date (newest first), then alphabetically by title
+- Includes external presentations with custom badges
+- Sorts: by `order` field (ascending), then by type, then by date (newest first)
 
 **Template**: `site/index.html.j2`
-- Jinja2 template for landing page HTML structure
-- References `style.css` for styling
-
-**Stylesheet**: `site/static/style.css`
-- Dark mode color scheme using CSS variables
-- Responsive card layout
-- Hover effects and transitions
-- Easy to customize via CSS variables in `:root`
-- Copied to `public/style.css` during build
-
-**Dependencies**:
-- `jinja2-cli` (via uvx, no permanent install)
-- `pyyaml` (via uvx, for reading YAML metadata)
+- Each presentation card shows: title link, date, Print link (`?print-pdf`), PDF link (`<deck>.pdf`)
+- External presentations open in new tabs with custom badges
 
 ## Deployment
 
-**Method**: Modern GitHub Actions artifact-based deployment
+**Method**: GitHub Actions artifact-based deployment with async PDF generation
 
-**Workflow**: On push to main branch:
-1. GitHub Actions runs `build.sh`
-2. Uploads `public/` as artifact
-3. Deploys artifact to GitHub Pages
-4. Site live at craig.uturndata.com
+**Workflow** (`.github/workflows/deploy.yml`): On push to main:
+
+1. **build**: Build site with `build.sh`, upload as pages artifact + build artifact
+2. **deploy**: Deploy to GitHub Pages (site goes live immediately)
+3. **build-pdfs**: Download build artifact, run `export_pdf.py`, upload as pages artifact
+4. **deploy-with-pdfs**: Redeploy with PDFs included
+
+The site deploys fast, and PDFs follow asynchronously once generated.
 
 **Key Points**:
-- Build output (`public/`) is NOT committed to git (it's in .gitignore)
+- Build output (`public/`) is NOT committed to git
 - No gh-pages branch needed
 - Automatic deployment on push to main
-- Manual trigger available via workflow_dispatch in GitHub Actions UI
-
-**GitHub Pages Settings**:
-- Source: "GitHub Actions" (not branch-based)
-- CNAME handled automatically by build script
+- Manual trigger available via workflow_dispatch
 
 ## Legacy Presentations
 

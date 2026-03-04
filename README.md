@@ -13,10 +13,14 @@ This repository contains markdown-based presentation slides that are converted i
 Install the required dependencies using Homebrew:
 
 ```bash
-brew install uv go-task
+brew install uv go-task nvm
+
+# Install Node.js via nvm
+nvm install --lts
+nvm alias default lts/*
 ```
 
-> mkslides is run via uvx, so is not needed to be installed independently
+> mkslides is run via uvx and decktape via npx, so neither needs to be installed independently.
 
 ## Quick Start
 
@@ -28,7 +32,7 @@ Visit [craig.uturndata.com](https://craig.uturndata.com) to see all available pr
 
 1. **Generate from template**:
    ```bash
-   ./new.sh my-presentation
+   task new -- my-presentation
    ```
 
 2. **Edit your slides**:
@@ -50,13 +54,13 @@ Visit [craig.uturndata.com](https://craig.uturndata.com) to see all available pr
 
 3. **Preview locally**:
    ```bash
-   ./serve.sh my-presentation
+   task serve -- my-presentation
    ```
    Opens at http://localhost:8000 with auto-reload
 
 4. **Build and test**:
    ```bash
-   ./build.sh
+   task build
    ```
 
 5. **Publish** (remove draft status):
@@ -67,6 +71,32 @@ Visit [craig.uturndata.com](https://craig.uturndata.com) to see all available pr
 
 6. **Deploy**: Commit and push to main - GitHub Actions deploys automatically
 
+## Development Workflow
+
+```bash
+task                          # List available tasks
+task list                     # List all presentations with status
+task new -- my-talk           # Create new presentation
+task serve                    # Serve entire site with auto-reload
+task serve -- my-talk         # Serve specific presentation
+task build                    # Build without serving
+task pdf                      # Export all presentations to PDF
+task pdf -- my-talk           # Export a specific presentation to PDF
+task clean                    # Clean build directory
+```
+
+Note: Tasks that accept arguments require `--` before the argument.
+
+Or using shell scripts directly:
+
+```bash
+./new.sh my-talk              # Create new presentation
+./serve.sh my-talk            # Serve specific presentation
+./serve.sh                    # Serve entire website
+./build.sh                    # Build only
+python3 scripts/export_pdf.py # Export all PDFs
+```
+
 ## Project Structure
 
 ```
@@ -76,6 +106,7 @@ presentations/    # Your presentation sources (markdown)
 
 template/         # Template for new presentations
 site/             # Site-level templates, assets, and static files
+scripts/          # Build and utility scripts
 legacy/           # Legacy presentations (not mkslides)
 public/           # Build output (auto-generated, not in git)
 ```
@@ -86,6 +117,19 @@ New presentations are **drafts** by default (`draft: true` in metadata.yml):
 - They build and are accessible by direct URL
 - They **don't** appear on the landing page
 - Set `draft: false` in metadata.yml when ready to publish
+
+## PDF Export
+
+PDF versions of presentations are generated using [decktape](https://github.com/astefanutti/decktape), which uses headless Chromium to capture each slide.
+
+```bash
+task pdf                    # Export all presentations (parallel)
+task pdf -- rocket-the-update  # Export a specific one
+```
+
+PDFs are written to `public/<deck-name>.pdf` (e.g., `public/git-101.pdf`).
+
+In CI, PDFs are generated asynchronously after the initial site deploy, then the site is redeployed with PDFs included.
 
 ## Static Files
 
@@ -114,7 +158,7 @@ You can add links to presentations hosted elsewhere by editing `site/external.ym
   order: 1  # Optional: control display order
 ```
 
-External presentations appear on the landing page alongside local presentations, sorted with modern presentations first.
+External presentations appear on the landing page alongside local presentations.
 
 ## Customization
 
@@ -128,28 +172,15 @@ See the `template/` folder for examples.
 
 ### Presentation Metadata
 
-Each presentation should have a `metadata.yml` file for the landing page:
-
 ```yaml
 title: "Your Presentation Title"
 description: "A brief description of what this presentation covers"
 date: "January 2024"
+draft: false    # true to hide from landing page
+order: 1        # Optional: lower numbers appear first
 ```
 
-**Fields:**
-- `title`: Human-friendly title (displayed on landing page)
-- `description`: Brief summary of the presentation content
-- `date`: Month and year (e.g., "January 2024")
-- `draft`: Set to `true` to hide from landing page, `false` to publish
-- `order`: Optional integer for custom sort order (lower numbers appear first)
-
-**Sorting**: Presentations with an `order` value appear first (ascending by order number), followed by presentations without order (sorted by date). Gaps in order values are acceptable (e.g., 1, 5, 10, 100).
-
-Presentations without metadata will use the folder name as the title and be treated as published (draft: false).
-
 ### Configuring Themes
-
-Each presentation can customize its appearance using the `mkslides.yml` configuration file:
 
 ```yaml
 slides:
@@ -158,36 +189,15 @@ slides:
   separator_notes: '^Note:'      # Pattern for speaker notes
 
 revealjs:
-  slideNumber: false             # Show/hide slide numbers
-  transition: slide              # Transition effect between slides
-  hash: true                     # URL hash navigation
-  controls: true                 # Show navigation controls
+  slideNumber: false
+  transition: slide
+  hash: true
+  controls: true
 ```
 
-**Available Presentation Themes:**
+**Dark themes**: `black`, `blood`, `league`, `moon` (default), `night`, `solarized`
 
-Dark themes:
-- `black` - Black background
-- `blood` - Dark with blood red accents
-- `league` - Gray with blue accents
-- `moon` - Dark blue/purple (default in this project)
-- `night` - Black with orange accents
-- `solarized` - Solarized dark
-
-Light themes:
-- `beige` - Beige with brown text
-- `serif` - Cappuccino with serif fonts
-- `simple` - White, minimal styling
-- `sky` - Blue sky gradient
-- `white` - White with black text
-
-**Code Highlighting Themes:**
-- `monokai` - Dark with bright colors (commonly used)
-- `vs2015` - Visual Studio dark
-- `github` - GitHub light
-- `atom-one-dark` - Atom editor dark
-- `zenburn` - Low-contrast dark
-- And many others supported by highlight.js
+**Light themes**: `beige`, `serif`, `simple`, `sky`, `white`
 
 ### Using Custom CSS Classes
 
@@ -196,8 +206,6 @@ Light themes:
 ```markdown
 <!-- .slide: class="compact" -->
 # Slide with Compact Layout
-
-Smaller text and tighter spacing
 ```
 
 **For images**, use the `.element` HTML comment:
@@ -206,90 +214,37 @@ Smaller text and tighter spacing
 ![My Image](assets/image.png) <!-- .element: class="fullscreen" -->
 ```
 
-**Built-in classes:**
-- `.compact` - Reduces font sizes and spacing for content-heavy slides
-- `.fullscreen` - Makes images larger
-
 Add your own classes in `custom.css` for each presentation.
 
 ## How It Works
 
 ### Build Process
 
-Running `./build.sh` does the following:
+Running `task build` (or `./build.sh`):
 
-1. **Cleans** the `public/` directory
+1. **Selectively cleans** `public/` (preserves existing PDFs)
 2. **Builds** each presentation individually with its custom configuration
-3. **Shares assets** - Creates a single `mkslides-assets/` folder for Reveal.js resources (saves space)
-4. **Renames** `slides.html` to `index.html` for clean URLs
-5. **Generates** the landing page index listing all non-draft presentations
-6. **Copies** legacy presentations from `legacy/`
-7. **Copies** static files from `site/static/` to the site root
-8. **Copies** the CNAME file for custom domain support
-
-The `public/` directory is excluded from git - it's regenerated on every build.
+3. **Shares assets** - Creates a single `mkslides-assets/` folder for Reveal.js resources
+4. **Generates** the landing page listing all non-draft presentations
+5. **Copies** legacy presentations from `legacy/`
+6. **Copies** static files from `site/static/`
+7. **Copies** the CNAME file for custom domain support
 
 ### Deployment
 
 The site uses **GitHub Actions** for automatic deployment:
 
-1. You push changes to the `main` branch
-2. GitHub Actions runs `./build.sh` automatically
-3. The `public/` folder is uploaded as an artifact
-4. GitHub Pages deploys the artifact
-5. Site goes live at craig.uturndata.com
+1. **Build** - Runs `build.sh`, uploads site artifact
+2. **Deploy** - Site goes live at craig.uturndata.com
+3. **Build PDFs** - Downloads build artifact, exports all PDFs via decktape
+4. **Deploy with PDFs** - Redeploys site with PDFs included
 
-No manual deployment needed - just push your changes.
-
-**Custom Domain**: The CNAME file is stored at `.github/CNAME` and automatically copied to `public/` during build.
+The site deploys immediately; PDFs follow asynchronously.
 
 ### Technology
 
 - **mkslides** - Converts markdown to Reveal.js presentations
 - **Reveal.js** - JavaScript presentation framework
+- **decktape** - PDF export via headless Chromium
+- **Task** - Task runner for development commands
 - **GitHub Pages** - Hosting platform
-
-## Development Workflow
-
-Using Task (recommended):
-
-```bash
-# List all presentations with status
-task list
-
-# Create new presentation
-task new my-talk
-
-# Edit slides
-$EDITOR presentations/my-talk/slides.md
-
-# Serve entire site with auto-reload
-task serve
-
-# Serve specific presentation with auto-reload
-task serve my-talk
-
-# Build without serving
-task build
-
-# Clean build directory
-task clean
-```
-
-Or using shell scripts directly:
-
-```bash
-# Create new presentation
-./new.sh my-talk
-
-# Serve specific presentation
-./serve.sh my-talk
-
-# Serve entire website with auto-reload
-./serve.sh
-
-# Build only
-./build.sh
-```
-
-To publish, edit `presentations/my-talk/metadata.yml` and set `draft: false`.

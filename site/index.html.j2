@@ -34,7 +34,8 @@
                 <span class="external-badge">{{ presentation.external_badge }}</span>
                 {% endif %}
                 {% if not presentation.is_external %}
-                <a href="{{ presentation.path }}/?print-pdf" class="print-pdf-link">PDF printable version</a>
+                <a href="{{ presentation.path }}/?print-pdf" class="print-pdf-link">Print</a>
+                <a href="{{ presentation.path }}.pdf" class="print-pdf-link">PDF</a>
                 {% endif %}
             </div>
 

@@ -22,10 +22,10 @@ tasks:
     summary: |
       Serve the entire website or a specific presentation with auto-reload.
 
-      Usage: task serve [presentation-name]
+      Usage: task serve -- [presentation-name]
       Examples:
-        task serve              # Serve entire website
-        task serve git-101      # Serve specific presentation
+        task serve                  # Serve entire website
+        task serve -- git-101       # Serve specific presentation
     cmds:
       - ./serve.sh {{.CLI_ARGS}}
 
@@ -40,10 +40,30 @@ tasks:
     summary: |
       Create a new presentation from the template.
 
-      Usage: task new <presentation-name>
-      Example: task new my-talk
+      Usage: task new -- <presentation-name>
+      Example: task new -- my-talk
+    preconditions:
+      - sh: '[ -n "{{.CLI_ARGS}}" ]'
+        msg: "Usage: task new -- <presentation-name>"
     cmds:
       - ./new.sh {{.CLI_ARGS}}
+
+  pdf:
+    desc: Export presentation(s) to PDF using decktape
+    summary: |
+      Export presentations to PDF via headless Chromium (decktape).
+
+      Usage: task pdf                        # Export all presentations
+             task pdf -- <presentation-name>  # Export a specific one
+      Example: task pdf -- rocket-the-update
+    vars:
+      DECK_NAME: '{{.CLI_ARGS}}'
+    preconditions:
+      - sh: '[ -z "{{.DECK_NAME}}" ] || [ -d "{{.SLIDES_SOURCE}}/{{.DECK_NAME}}" ]'
+        msg: "Deck '{{.DECK_NAME}}' not found in {{.SLIDES_SOURCE}}/"
+    cmds:
+      - task: build
+      - python3 scripts/export_pdf.py {{.DECK_NAME}}
 
   list:
     desc: List all presentations

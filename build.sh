@@ -5,9 +5,11 @@ SLIDES_SOURCE="presentations"
 OUTPUT_DIR="public"
 LEGACY_SOURCE="legacy"
 
-# Step 1: Clean output directory
+# Step 1: Clean build artifacts (preserve PDFs)
 echo "Cleaning output directory..."
-rm -rf "$OUTPUT_DIR"
+if [ -d "$OUTPUT_DIR" ]; then
+    find "$OUTPUT_DIR" -mindepth 1 -maxdepth 1 ! -name '*.pdf' -exec rm -rf {} +
+fi
 mkdir -p "$OUTPUT_DIR"
 
 # Step 2: Build each deck individually with its config
